@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots & Bloom · Wellness Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm-white: #FFFEF9;
+    --beige: #EDE8DF;
+    --beige-deep: #DDD5C8;
+    --sage: #8FA889;
+    --sage-light: #B5C9B0;
+    --sage-pale: #E8EFE6;
+    --sage-dark: #4A6B45;
+    --text-dark: #1E1B18;
+    --text-mid: #3A3530;
+    --text-light: #6A6058;
+    --blush: #E8D5C8;
+    --blush-light: #F5EDE6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    font-weight: 400;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--beige);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-dark);
+    letter-spacing: 0.04em;
+  }
+
+  .nav-brand span { color: var(--sage-dark); font-style: italic; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--beige);
+    padding: 4px;
+    border-radius: 50px;
+  }
+
+  .nav-tab {
+    background: none;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .nav-tab.active {
+    background: var(--warm-white);
+    color: var(--text-dark);
+    box-shadow: 0 1px 6px rgba(58,53,48,0.1);
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-primary {
+    background: var(--sage-dark);
+    color: white;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--sage); }
+
+  .btn-ghost {
+    background: none;
+    border: 1.5px solid var(--beige-deep);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--sage); color: var(--sage-dark); }
+
+  .page { display: none; animation: fadeUp 0.35s ease both; }
+  .page.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .client-bar {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--beige);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .client-label {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .client-select-wrap { position: relative; }
+
+  .client-select {
+    appearance: none;
+    background: var(--beige);
+    border: none;
+    padding: 7px 32px 7px 14px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    outline: none;
+    font-weight: 500;
+  }
+
+  .client-select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    pointer-events: none;
+    font-size: 0.8rem;
+  }
+
+  .client-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--sage-pale);
+    border: 1px solid var(--sage-light);
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    color: var(--sage-dark);
+    font-weight: 500;
+  }
+
+  .client-dot {
+    width: 6px; height: 6px;
+    background: var(--sage);
+    border-radius: 50%;
+  }
+
+  .save-status {
+    font-size: 0.72rem;
+    color: var(--sage-dark);
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-weight: 500;
+  }
+
+  .save-status.visible { opacity: 1; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 20px 80px;
+  }
+
+  .page-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin-bottom: 28px;
+  }
+
+  .page-title em { font-style: italic; color: var(--sage-dark); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--warm-white);
+    border-radius: 18px;
+    padding: 24px 26px;
+    border: 1px solid var(--beige);
+    margin-bottom: 16px;
+  }
+
+  .card.sage-tint { background: var(--sage-pale); border-color: var(--sage-light); }
+  .card.blush-tint { background: var(--blush-light); border-color: var(--blush); }
+
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-icon {
+    width: 22px; height: 22px;
+    background: var(--beige);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    color: var(--text-mid);
+  }
+
+  .sage-tint .card-icon { background: rgba(143,168,137,0.3); }
+  .blush-tint .card-icon { background: rgba(232,213,200,0.6); }
+
+  /* ── PROFILE CARD ── */
+  .profile-card {
+    background: var(--warm-white);
+    border-radius: 18px;
+    padding: 24px 26px;
+    border: 1px solid var(--beige);
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .avatar {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--blush), var(--sage-pale));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--text-mid);
+    flex-shrink: 0;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 14px; }
+
+  /* ── FIELDS ── */
+  .field-label {
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .field-input {
+    background: none;
+    border: none;
+    border-bottom: 1.5px solid var(--beige-deep);
+    padding: 5px 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    width: 100%;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field-input::placeholder { color: #9A9088; }
+  .field-input:focus { border-color: var(--sage); }
+
+  .field-textarea {
+    background: var(--cream);
+    border: 1.5px solid var(--beige-deep);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.86rem;
+    color: var(--text-dark);
+    width: 100%;
+    font-weight: 400;
+    outline: none;
+    resize: none;
+    min-height: 88px;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  .field-textarea::placeholder { color: #9A9088; }
+  .field-textarea:focus { border-color: var(--sage); background: var(--warm-white); }
+
+  .sage-tint .field-textarea { background: rgba(255,255,255,0.5); }
+
+  /* ── GRID ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* ── TAGS ── */
+  .tags-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 12px;
+    min-height: 28px;
+  }
+
+  .tag {
+    background: var(--beige);
+    border-radius: 50px;
+    padding: 4px 10px 4px 12px;
+    font-size: 0.76rem;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 400;
+  }
+
+  .tag.sage { background: rgba(143,168,137,0.25); color: var(--sage-dark); }
+  .tag.blush { background: var(--blush); color: #5A3020; }
+
+  .tag-remove {
+    background: none; border: none;
+    cursor: pointer; color: var(--text-light);
+    font-size: 0.88rem; line-height: 1; padding: 0;
+  }
+
+  .tag-row {
+    display: flex; gap: 7px; align-items: center;
+  }
+
+  .tag-input {
+    background: none; border: none;
+    border-bottom: 1.5px solid var(--beige-deep);
+    padding: 5px 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-dark);
+    font-weight: 400;
+    outline: none; flex: 1;
+  }
+
+  .tag-input::placeholder { color: #9A9088; }
+
+  .tag-add {
+    background: none;
+    border: 1.5px solid var(--beige-deep);
+    border-radius: 50px;
+    padding: 4px 12px;
+    font-size: 0.73rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .tag-add:hover { border-color: var(--sage); color: var(--sage-dark); }
+
+  /* ── EMOTION ── */
+  .emotion-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .emotion-btn {
+    background: none;
+    border: 1.5px solid var(--beige-deep);
+    border-radius: 10px;
+    padding: 9px 3px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .em { font-size: 1rem; }
+  .em-label { font-size: 0.6rem; color: var(--text-mid); font-weight: 500; }
+
+  .emotion-btn.selected {
+    background: var(--sage-pale);
+    border-color: var(--sage);
+  }
+
+  /* ── SESSIONS ── */
+  .sessions-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .session-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .session-card {
+    background: var(--warm-white);
+    border-radius: 18px;
+    border: 1px solid var(--beige);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .session-card:hover { box-shadow: 0 3px 16px rgba(58,53,48,0.07); }
+
+  .session-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--beige);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .session-hd-left { display: flex; align-items: center; gap: 16px; }
+
+  .session-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--beige-deep);
+    min-width: 30px;
+  }
+
+  .session-hd h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-dark);
+    margin-bottom: 1px;
+  }
+
+  .session-hd p { font-size: 0.75rem; color: var(--text-light); font-weight: 500; }
+
+  .session-badge {
+    background: var(--sage-pale);
+    color: var(--sage-dark);
+    border: 1px solid var(--sage-light);
+    border-radius: 50px;
+    padding: 3px 10px;
+    font-size: 0.68rem;
+    font-weight: 500;
+  }
+
+  .session-toggle {
+    background: none; border: none;
+    cursor: pointer; color: var(--text-light);
+    font-size: 1rem;
+    transition: transform 0.25s;
+    display: flex; align-items: center;
+  }
+
+  .session-toggle.open { transform: rotate(180deg); }
+
+  .session-body {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.3s ease;
+  }
+
+  .session-body.open { max-height: 1000px; padding: 22px; }
+
+  .session-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .session-field { display: flex; flex-direction: column; }
+
+  .progress-box {
+    background: var(--sage-pale);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px dashed var(--sage-light);
+    margin-top: 4px;
+  }
+
+  .progress-label {
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .divider { height: 1px; background: var(--beige); margin: 16px 0; }
+
+  .del-btn {
+    background: none; border: none;
+    font-size: 0.76rem; color: var(--text-light);
+    cursor: pointer; padding: 3px 8px;
+    border-radius: 6px; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif; font-weight: 400;
+  }
+
+  .del-btn:hover { color: #C07A7A; background: #FFF0F0; }
+
+  .empty {
+    text-align: center; padding: 56px 24px;
+  }
+
+  .empty-icon { font-size: 2.2rem; margin-bottom: 14px; opacity: 0.45; }
+
+  .empty p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem; font-style: italic;
+    color: var(--text-mid); margin-bottom: 4px;
+  }
+
+  .empty span { font-size: 0.78rem; color: var(--text-light); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .profile-card { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .session-2col { grid-template-columns: 1fr; }
+    .nav-brand { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">Roots &amp; <span>Bloom</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('overview',this)">Client Profile</button>
+    <button class="nav-tab" onclick="switchPage('sessions',this)">Session Notes</button>
+  </div>
+  <div class="nav-actions">
+    <span class="save-status" id="saveStatus">✦ Saved</span>
+    <button class="btn-ghost" onclick="newClient()">+ New Client</button>
+    <button class="btn-primary" onclick="saveData()">Save</button>
+  </div>
+</nav>
+
+<div class="client-bar">
+  <span class="client-label">Viewing</span>
+  <div class="client-select-wrap">
+    <select class="client-select" id="clientSelect" onchange="loadClient(this.value)"></select>
+  </div>
+  <div class="client-pill">
+    <div class="client-dot"></div>
+    <span id="clientPillName">–</span>
+  </div>
+</div>
+
+<!-- PAGE 1 -->
+<div class="page active" id="page-overview">
+  <div class="layout">
+    <div class="page-eyebrow">✦ Client Overview</div>
+    <h1 class="page-title">Wellness <em>Profile</em></h1>
+
+    <div class="profile-card">
+      <div class="avatar" id="avatarCircle">?</div>
+      <div class="field-group">
+        <div>
+          <div class="field-label">Full Name</div>
+          <input class="field-input" id="clientName" type="text" placeholder="e.g. Sophia Laurent" oninput="updateClientName(this.value)">
+        </div>
+        <div>
+          <div class="field-label">Age &amp; Pronouns</div>
+          <input class="field-input" id="clientAge" type="text" placeholder="e.g. 34 · she/her">
+        </div>
+        <div>
+          <div class="field-label">Session Frequency</div>
+          <input class="field-input" id="clientFreq" type="text" placeholder="e.g. Weekly, Tuesdays 9am">
+        </div>
+      </div>
+      <div class="field-group">
+        <div>
+          <div class="field-label">Lifestyle Notes</div>
+          <input class="field-input" id="clientLifestyle" type="text" placeholder="e.g. Desk job, low sleep">
+        </div>
+        <div>
+          <div class="field-label">Experience Level</div>
+          <input class="field-input" id="clientExp" type="text" placeholder="e.g. Beginner, 3 months">
+        </div>
+        <div>
+          <div class="field-label">Date Started</div>
+          <input class="field-input" id="clientStart" type="text" placeholder="e.g. March 2025">
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card sage-tint">
+        <div class="card-title"><span class="card-icon">✦</span> Goals &amp; Intentions</div>
+        <textarea class="field-textarea" id="clientGoals" placeholder="What does this client want to achieve? Short and long-term intentions…" rows="4"></textarea>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-icon">◌</span> Emotional State</div>
+        <div class="emotion-grid">
+          <button class="emotion-btn" data-em="Calm" onclick="selectEmotion(this)"><span class="em">🌿</span><span class="em-label">Calm</span></button>
+          <button class="emotion-btn" data-em="Anxious" onclick="selectEmotion(this)"><span class="em">🌀</span><span class="em-label">Anxious</span></button>
+          <button class="emotion-btn" data-em="Tired" onclick="selectEmotion(this)"><span class="em">🌙</span><span class="em-label">Tired</span></button>
+          <button class="emotion-btn" data-em="Energised" onclick="selectEmotion(this)"><span class="em">☀️</span><span class="em-label">Energised</span></button>
+          <button class="emotion-btn" data-em="Grounded" onclick="selectEmotion(this)"><span class="em">🪨</span><span class="em-label">Grounded</span></button>
+        </div>
+        <div class="field-label">Notes</div>
+        <input class="field-input" id="clientEmotionNote" type="text" placeholder="Any emotional context to note…">
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title"><span class="card-icon">↑</span> Strengths</div>
+        <div class="tags-wrap" id="strengthTags"></div>
+        <div class="tag-row">
+          <input class="tag-input" id="strengthInput" type="text" placeholder="Add a strength…" onkeydown="tagKey(event,'strength')">
+          <button class="tag-add" onclick="addTag('strength')">+ Add</button>
+        </div>
+      </div>
+      <div class="card blush-tint">
+        <div class="card-title"><span class="card-icon">↓</span> Areas to Develop</div>
+        <div class="tags-wrap" id="weaknessTags"></div>
+        <div class="tag-row">
+          <input class="tag-input" id="weaknessInput" type="text" placeholder="Add an area…" onkeydown="tagKey(event,'weakness')">
+          <button class="tag-add" onclick="addTag('weakness')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title"><span class="card-icon">◎</span> Focus Areas</div>
+        <div class="tags-wrap" id="focusTags"></div>
+        <div class="tag-row">
+          <input class="tag-input" id="focusInput" type="text" placeholder="e.g. Hip mobility, breathwork…" onkeydown="tagKey(event,'focus')">
+          <button class="tag-add" onclick="addTag('focus')">+ Add</button>
+        </div>
+      </div>
+      <div class="card sage-tint">
+        <div class="card-title"><span class="card-icon">◇</span> Preferred Techniques</div>
+        <div class="tags-wrap" id="techniqueTags"></div>
+        <div class="tag-row">
+          <input class="tag-input" id="techniqueInput" type="text" placeholder="e.g. Yin yoga, pranayama…" onkeydown="tagKey(event,'technique')">
+          <button class="tag-add" onclick="addTag('technique')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">✎</span> Practitioner Notes</div>
+      <textarea class="field-textarea" id="clientNotes" placeholder="Contraindications, personal context, reminders for future sessions…" rows="4" style="min-height:100px"></textarea>
+    </div>
+
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page-sessions">
+  <div class="layout">
+    <div class="sessions-header">
+      <div>
+        <div class="page-eyebrow">✦ Session Record</div>
+        <h1 class="page-title">Class <em>Notes</em></h1>
+      </div>
+      <button class="btn-primary" onclick="addSession()">+ New Session</button>
+    </div>
+    <div class="session-list" id="sessionList">
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">🌿</div>
+        <p>No sessions yet</p>
+        <span>Add your first session to begin tracking progress.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let cid = null, clients = {}, timer = null;
+
+function id() { return 'c_' + Date.now() + Math.random().toString(36).slice(2,6); }
+
+function blank(name) {
+  return { id: id(), name: name||'New Client', age:'', freq:'', lifestyle:'', exp:'', start:'',
+    goals:'', emotionState:'', emotionNote:'', strengths:[], weaknesses:[], focus:[], techniques:[], notes:'', sessions:[] };
+}
+
+function init() {
+  try { const r = localStorage.getItem('rb_v2'); if(r) clients = JSON.parse(r); } catch(e){}
+  if (!Object.keys(clients).length) {
+    const c = blank('Emma Hartley');
+    c.age='31 · she/her'; c.freq='Weekly, Mondays 8am';
+    c.lifestyle='Desk job, active weekends'; c.exp='Beginner, 3 months';
+    c.goals='Build core strength, reduce lower back tension, create a consistent movement practice.';
+    c.strengths=['Dedication','Good breath awareness','Flexible hamstrings'];
+    c.weaknesses=['Hip flexor tightness','Wrist sensitivity','Racing mind during stillness'];
+    c.focus=['Core stability','Hip opening','Restorative'];
+    c.techniques=['Vinyasa flow','Yin','Yoga nidra'];
+    c.emotionState='Anxious';
+    c.notes='History of lower back discomfort (L4-L5). Avoid deep forward folds. Responds well to grounding cues and slow pacing.';
+    clients[c.id] = c;
+  }
+  const ids = Object.keys(clients);
+  if (!cid || !clients[cid]) cid = ids[0];
+  buildSelect(); loadClient(cid, false);
+}
+
+function persist() {
+  capture();
+  try { localStorage.setItem('rb_v2', JSON.stringify(clients)); } catch(e){}
+  const s = document.getElementById('saveStatus');
+  s.classList.add('visible');
+  setTimeout(() => s.classList.remove('visible'), 2000);
+}
+
+function saveData() { persist(); }
+function autosave() { clearTimeout(timer); timer = setTimeout(persist, 1200); }
+document.addEventListener('input', autosave);
+
+function buildSelect() {
+  const sel = document.getElementById('clientSelect');
+  sel.innerHTML = '';
+  Object.values(clients).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name || 'Unnamed';
+    if (c.id === cid) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function loadClient(clientId, doCapture=true) {
+  if (doCapture && cid && clients[cid]) capture();
+  cid = clientId;
+  const c = clients[cid]; if (!c) return;
+  document.getElementById('clientSelect').value = cid;
+  document.getElementById('clientPillName').textContent = c.name || 'Unnamed';
+  document.getElementById('avatarCircle').textContent = (c.name||'?')[0].toUpperCase();
+  document.getElementById('clientName').value = c.name||'';
+  document.getElementById('clientAge').value = c.age||'';
+  document.getElementById('clientFreq').value = c.freq||'';
+  document.getElementById('clientLifestyle').value = c.lifestyle||'';
+  document.getElementById('clientExp').value = c.exp||'';
+  document.getElementById('clientStart').value = c.start||'';
+  document.getElementById('clientGoals').value = c.goals||'';
+  document.getElementById('clientEmotionNote').value = c.emotionNote||'';
+  document.getElementById('clientNotes').value = c.notes||'';
+  document.querySelectorAll('.emotion-btn').forEach(b => b.classList.toggle('selected', b.dataset.em === c.emotionState));
+  ['strengths','weaknesses','focus','techniques'].forEach(k => renderTags(k, c[k]||[]));
+  renderSessions();
+}
+
+function capture() {
+  if (!cid || !clients[cid]) return;
+  const c = clients[cid];
+  c.name = document.getElementById('clientName').value;
+  c.age = document.getElementById('clientAge').value;
+  c.freq = document.getElementById('clientFreq').value;
+  c.lifestyle = document.getElementById('clientLifestyle').value;
+  c.exp = document.getElementById('clientExp').value;
+  c.start = document.getElementById('clientStart').value;
+  c.goals = document.getElementById('clientGoals').value;
+  c.emotionNote = document.getElementById('clientEmotionNote').value;
+  c.notes = document.getElementById('clientNotes').value;
+}
+
+function updateClientName(val) {
+  if (!cid) return;
+  clients[cid].name = val;
+  document.getElementById('clientPillName').textContent = val||'Unnamed';
+  document.getElementById('avatarCircle').textContent = (val||'?')[0].toUpperCase();
+  buildSelect();
+}
+
+function newClient() {
+  capture();
+  const c = blank();
+  clients[c.id] = c; cid = c.id;
+  buildSelect(); loadClient(c.id, false);
+  document.getElementById('clientName').focus();
+}
+
+function selectEmotion(btn) {
+  document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if (cid) clients[cid].emotionState = btn.dataset.em;
+}
+
+const TC = { strengths:'strengthTags', weaknesses:'weaknessTags', focus:'focusTags', techniques:'techniqueTags' };
+const TI = { strengths:'strengthInput', weaknesses:'weaknessInput', focus:'focusInput', techniques:'techniqueInput' };
+const TK = { strength:'strengths', weakness:'weaknesses', focus:'focus', technique:'techniques' };
+const COL = { strengths:'sage', weaknesses:'blush', focus:'', techniques:'sage' };
+
+function renderTags(key, arr) {
+  const el = document.getElementById(TC[key]); if (!el) return;
+  el.innerHTML = '';
+  (arr||[]).forEach((t,i) => {
+    const s = document.createElement('span');
+    s.className = 'tag' + (COL[key] ? ' '+COL[key] : '');
+    s.innerHTML = `${t} <button class="tag-remove" onclick="removeTag('${key}',${i})">×</button>`;
+    el.appendChild(s);
+  });
+}
+
+function addTag(sk) {
+  const dk = TK[sk]||sk+'s';
+  const inp = document.getElementById(TI[dk]||sk+'Input');
+  if (!inp||!inp.value.trim()||!cid) return;
+  clients[cid][dk] = clients[cid][dk]||[];
+  clients[cid][dk].push(inp.value.trim());
+  inp.value = '';
+  renderTags(dk, clients[cid][dk]);
+  autosave();
+}
+
+function removeTag(key, idx) {
+  if (!cid) return;
+  clients[cid][key].splice(idx,1);
+  renderTags(key, clients[cid][key]);
+  autosave();
+}
+
+function tagKey(e, sk) { if (e.key==='Enter') { e.preventDefault(); addTag(sk); } }
+
+function switchPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (name==='sessions') renderSessions();
+}
+
+function addSession() {
+  if (!cid) return;
+  capture();
+  const c = clients[cid];
+  c.sessions = c.sessions||[];
+  c.sessions.unshift({ id:id(), date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),
+    focus:'', whatWeDid:'', clientResponse:'', progressNotes:'', open:true });
+  renderSessions(); autosave();
+}
+
+function renderSessions() {
+  if (!cid) return;
+  const c = clients[cid];
+  const list = document.getElementById('sessionList');
+  const empty = document.getElementById('emptyState');
+  const sessions = c.sessions||[];
+  if (!sessions.length) { list.innerHTML=''; list.appendChild(empty); empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = '';
+  sessions.forEach((s,i) => {
+    const card = document.createElement('div');
+    card.className = 'session-card';
+    card.innerHTML = `
+      <div class="session-hd" onclick="toggleS('${s.id}')">
+        <div class="session-hd-left">
+          <div class="session-num">${String(sessions.length-i).padStart(2,'0')}</div>
+          <div>
+            <h3>${s.focus||'Untitled Session'}</h3>
+            <p>${s.date||'No date set'}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${s.progressNotes?'<span class="session-badge">Notes ✦</span>':''}
+          <button class="session-toggle ${s.open?'open':''}" id="tog_${s.id}">▾</button>
+        </div>
+      </div>
+      <div class="session-body ${s.open?'open':''}" id="bd_${s.id}">
+        <div class="session-2col">
+          <div class="session-field">
+            <div class="field-label">Date</div>
+            <input class="field-input" value="${s.date||''}" placeholder="dd Month yyyy" onchange="updS('${s.id}','date',this.value)">
+          </div>
+          <div class="session-field">
+            <div class="field-label">Session Focus</div>
+            <input class="field-input" value="${s.focus||''}" placeholder="e.g. Hip opening, Restorative" oninput="updS('${s.id}','focus',this.value)">
+          </div>
+        </div>
+        <div class="session-field" style="margin-bottom:14px">
+          <div class="field-label">What We Did</div>
+          <textarea class="field-textarea" placeholder="Sequence, poses, techniques, duration…" rows="3" onchange="updS('${s.id}','whatWeDid',this.value)">${s.whatWeDid||''}</textarea>
+        </div>
+        <div class="session-field" style="margin-bottom:14px">
+          <div class="field-label">Client Response</div>
+          <textarea class="field-textarea" placeholder="Energy, mood, physical response, any feedback…" rows="3" onchange="updS('${s.id}','clientResponse',this.value)">${s.clientResponse||''}</textarea>
+        </div>
+        <div class="progress-box">
+          <div class="progress-label">✦ Quick Progress Notes</div>
+          <textarea class="field-textarea" style="background:transparent;border:none;padding:0;min-height:68px" placeholder="Observations, improvements, things to revisit…" onchange="updS('${s.id}','progressNotes',this.value)">${s.progressNotes||''}</textarea>
+        </div>
+        <div class="divider"></div>
+        <div style="text-align:right">
+          <button class="del-btn" onclick="delS('${s.id}')">Remove session</button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function toggleS(sid) {
+  if (!cid) return;
+  const s = (clients[cid].sessions||[]).find(x=>x.id===sid); if (!s) return;
+  s.open = !s.open;
+  document.getElementById('bd_'+sid)?.classList.toggle('open', s.open);
+  document.getElementById('tog_'+sid)?.classList.toggle('open', s.open);
+}
+
+function updS(sid, field, val) {
+  if (!cid) return;
+  const s = (clients[cid].sessions||[]).find(x=>x.id===sid); if (!s) return;
+  s[field] = val; autosave();
+  if (field==='focus'||field==='date') {
+    const hd = document.getElementById('bd_'+sid)?.previousElementSibling;
+    if (hd) {
+      const h3 = hd.querySelector('h3'), p = hd.querySelector('p');
+      if (field==='focus'&&h3) h3.textContent = val||'Untitled Session';
+      if (field==='date'&&p) p.textContent = val||'No date set';
+    }
+  }
+}
+
+function delS(sid) {
+  if (!cid) return;
+  clients[cid].sessions = (clients[cid].sessions||[]).filter(x=>x.id!==sid);
+  renderSessions(); autosave();
+}
+
+init();
+</script>
+</body>
+</html>
