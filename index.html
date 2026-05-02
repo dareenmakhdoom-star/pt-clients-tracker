@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots & Bloom · Wellness Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm: #FFFEF9;
+    --beige: #EDE8DF;
+    --beige-d: #DDD5C8;
+    --sage: #8FA889;
+    --sage-l: #B5C9B0;
+    --sage-p: #E8EFE6;
+    --sage-dk: #4A6B45;
+    --text: #1E1B18;
+    --mid: #3A3530;
+    --lt: #6A6058;
+    --blush: #E8D5C8;
+    --blush-l: #F5EDE6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; font-weight: 400; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--warm); border-bottom: 1px solid var(--beige); position: sticky; top: 0; z-index: 100; gap: 8px; flex-wrap: wrap; }
+  .nav-brand { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 400; color: var(--text); }
+  .nav-brand em { font-style: italic; color: var(--sage-dk); }
+  .nav-tabs { display: flex; gap: 3px; background: var(--beige); padding: 3px; border-radius: 50px; }
+  .nav-tab { background: none; border: none; padding: 7px 16px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--mid); cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .nav-tab.active { background: var(--warm); color: var(--text); box-shadow: 0 1px 5px rgba(0,0,0,.08); }
+  .nav-actions { display: flex; gap: 6px; align-items: center; }
+  .btn-p { background: var(--sage-dk); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .btn-g { background: none; border: 1.5px solid var(--beige-d); padding: 7px 14px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 500; color: var(--mid); cursor: pointer; white-space: nowrap; }
+  .save-ok { font-size: 0.68rem; color: var(--sage-dk); font-weight: 500; opacity: 0; transition: opacity .3s; }
+  .save-ok.show { opacity: 1; }
+
+  /* CLIENT BAR */
+  .cbar { background: var(--warm); border-bottom: 1px solid var(--beige); padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .clabel { font-size: 0.63rem; color: var(--lt); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  .csel-wrap { position: relative; }
+  .csel { appearance: none; background: var(--beige); border: none; padding: 6px 28px 6px 12px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--text); font-weight: 500; outline: none; cursor: pointer; }
+  .csel-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--lt); pointer-events: none; font-size: 0.75rem; }
+  .cpill { display: inline-flex; align-items: center; gap: 6px; background: var(--sage-p); border: 1px solid var(--sage-l); padding: 4px 10px; border-radius: 50px; font-size: 0.7rem; color: var(--sage-dk); font-weight: 500; }
+  .cdot { width: 6px; height: 6px; background: var(--sage); border-radius: 50%; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* LAYOUT */
+  .wrap { max-width: 820px; margin: 0 auto; padding: 28px 16px 80px; }
+
+  /* EDITABLE LABELS — the key feature */
+  .el {
+    display: inline-block;
+    outline: none;
+    cursor: text;
+    border-radius: 4px;
+    transition: background .15s;
+    min-width: 20px;
+  }
+  .el:hover { background: rgba(143,168,137,.15); }
+  .el:focus { background: rgba(143,168,137,.2); box-shadow: 0 0 0 2px var(--sage-l); }
+
+  /* page eyebrow */
+  .eyebrow .el { font-size: 0.65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--sage-dk); font-weight: 600; }
+  /* page title */
+  .ptitle { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; color: var(--text); line-height: 1.2; margin-bottom: 22px; }
+  .ptitle .el { font-family: 'Cormorant Garamond', serif; font-size: inherit; font-weight: inherit; color: var(--text); }
+  .ptitle .el-em { font-style: italic; color: var(--sage-dk); }
+  /* field label */
+  .fl .el { font-size: 0.6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lt); font-weight: 600; }
+  /* section title */
+  .st .el { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 400; color: var(--text); }
+  /* nav brand */
+  .nav-brand .el { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 400; color: var(--text); }
+  .nav-brand .el-em { font-style: italic; color: var(--sage-dk); }
+
+  /* edit hint */
+  .edit-hint { font-size: 0.62rem; color: var(--lt); letter-spacing: .04em; opacity: .7; margin-bottom: 18px; display: flex; align-items: center; gap: 5px; }
+  .edit-hint::before { content: '✎'; }
+
+  /* PROFILE CARD */
+  .pcard { background: var(--warm); border-radius: 16px; padding: 20px; border: 1px solid var(--beige); margin-bottom: 14px; display: grid; grid-template-columns: 52px 1fr 1fr; gap: 16px; align-items: start; }
+  .avatar { width: 52px; height: 52px; background: linear-gradient(135deg, var(--blush), var(--sage-p)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; color: var(--mid); flex-shrink: 0; }
+  .fgroup { display: flex; flex-direction: column; gap: 13px; }
+
+  /* FIELDS */
+  .fl { margin-bottom: 4px; }
+  .fi { background: none; border: none; border-bottom: 1.5px solid var(--beige-d); padding: 5px 2px; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--text); width: 100%; font-weight: 400; outline: none; transition: border-color .2s; }
+  .fi::placeholder { color: #9A9088; }
+  .fi:focus { border-color: var(--sage); }
+  .ta { background: rgba(255,255,255,.6); border: 1.5px solid var(--beige-d); border-radius: 8px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text); width: 100%; font-weight: 400; outline: none; resize: none; min-height: 80px; line-height: 1.6; transition: border-color .2s; }
+  .ta::placeholder { color: #9A9088; }
+  .ta:focus { border-color: var(--sage); background: var(--warm); }
+
+  /* CARDS */
+  .card { background: var(--warm); border-radius: 16px; padding: 20px; border: 1px solid var(--beige); margin-bottom: 0; }
+  .card.sage { background: var(--sage-p); border-color: var(--sage-l); }
+  .card.blush { background: var(--blush-l); border-color: var(--blush); }
+  .card-inner { display: flex; flex-direction: column; gap: 0; }
+
+  /* GRID */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  /* TAGS */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 24px; }
+  .tag { background: var(--beige); border-radius: 50px; padding: 3px 10px 3px 12px; font-size: 0.72rem; color: var(--text); display: flex; align-items: center; gap: 4px; font-weight: 400; }
+  .tag.sage { background: rgba(143,168,137,.25); color: #3A5A35; }
+  .tag.blush { background: var(--blush); color: #5A3020; }
+  .tag-x { background: none; border: none; cursor: pointer; color: var(--lt); font-size: .85rem; line-height: 1; padding: 0; }
+  .trow { display: flex; gap: 6px; align-items: center; }
+  .ti { background: none; border: none; border-bottom: 1.5px solid var(--beige-d); padding: 4px 2px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text); font-weight: 400; outline: none; flex: 1; }
+  .ti::placeholder { color: #9A9088; }
+  .tadd { background: none; border: 1.5px solid var(--beige-d); border-radius: 50px; padding: 3px 10px; font-size: 0.7rem; color: var(--mid); cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; white-space: nowrap; }
+
+  /* EMOTION */
+  .emg { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-bottom: 12px; }
+  .emb { background: none; border: 1.5px solid var(--beige-d); border-radius: 8px; padding: 8px 2px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+  .emb.on { background: var(--sage-p); border-color: var(--sage); }
+  .emb .emi { font-size: 16px; }
+  .emb .eml { font-size: 0.55rem; color: var(--mid); font-weight: 500; }
+
+  /* SESSIONS */
+  .sh-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+  .slist { display: flex; flex-direction: column; gap: 12px; }
+  .scard { background: var(--warm); border-radius: 16px; border: 1px solid var(--beige); overflow: hidden; }
+  .shd { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--beige); cursor: pointer; user-select: none; }
+  .shl { display: flex; align-items: center; gap: 12px; }
+  .snum { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; color: #C8C0B8; min-width: 26px; }
+  .smeta h3 { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 400; color: var(--text); margin-bottom: 1px; }
+  .smeta p { font-size: 0.7rem; color: var(--lt); font-weight: 500; }
+  .sbadge { background: var(--sage-p); color: var(--sage-dk); border: 1px solid var(--sage-l); border-radius: 50px; padding: 2px 8px; font-size: 0.65rem; font-weight: 500; }
+  .stog { background: none; border: none; cursor: pointer; color: var(--lt); font-size: 0.9rem; transition: transform .25s; display: flex; align-items: center; }
+  .stog.on { transform: rotate(180deg); }
+  .sbody { max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .3s; padding: 0 18px; }
+  .sbody.on { max-height: 1400px; padding: 18px; }
+  .s2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .sfield { display: flex; flex-direction: column; }
+  .prog { background: var(--sage-p); border-radius: 10px; padding: 14px; border: 1px dashed var(--sage-l); }
+  .prog-l { font-size: 0.6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-dk); font-weight: 600; margin-bottom: 7px; }
+  .div { height: 1px; background: var(--beige); margin: 12px 0; }
+  .del { background: none; border: none; font-size: 0.7rem; color: var(--lt); cursor: pointer; padding: 2px 6px; border-radius: 6px; font-family: 'DM Sans', sans-serif; }
+  .empty { text-align: center; padding: 48px 20px; }
+  .empty-i { font-size: 1.8rem; margin-bottom: 10px; opacity: .4; }
+  .empty p { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--mid); margin-bottom: 2px; }
+  .empty span { font-size: 0.72rem; color: var(--lt); }
+
+  .st { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+  .si { width: 20px; height: 20px; background: var(--beige); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; color: var(--mid); flex-shrink: 0; }
+  .sage .si { background: rgba(143,168,137,.3); }
+  .blush .si { background: rgba(232,213,200,.6); }
+  .eyebrow { margin-bottom: 6px; }
+
+  @media(max-width:500px) {
+    .pcard { grid-template-columns: 1fr; }
+    .g2 { grid-template-columns: 1fr; }
+    .s2 { grid-template-columns: 1fr; }
+    .avatar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span class="el" contenteditable="true" spellcheck="false" onblur="saveLabels()">Roots &amp; </span><em class="el el-em" contenteditable="true" spellcheck="false" onblur="saveLabels()">Bloom</em>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goPage('overview',this)">Client Profile</button>
+    <button class="nav-tab" onclick="goPage('sessions',this)">Session Notes</button>
+  </div>
+  <div class="nav-actions">
+    <span class="save-ok" id="savedMsg">✦ Saved</span>
+    <button class="btn-g" onclick="newClient()">+ New Client</button>
+    <button class="btn-p" onclick="doSave()">Save</button>
+  </div>
+</nav>
+
+<div class="cbar">
+  <span class="clabel">Viewing</span>
+  <div class="csel-wrap">
+    <select class="csel" id="clientSel" onchange="loadClient(this.value)"></select>
+  </div>
+  <div class="cpill"><div class="cdot"></div><span id="pillName">–</span></div>
+</div>
+
+<!-- PAGE 1: OVERVIEW -->
+<div class="page active" id="pg-overview">
+<div class="wrap">
+
+  <div class="edit-hint">Tap any label or heading to edit it</div>
+
+  <div class="eyebrow"><span class="el" contenteditable="true" spellcheck="false" data-lk="ey1" onblur="saveLabels()">✦ Client Overview</span></div>
+  <h1 class="ptitle">
+    <span class="el" contenteditable="true" spellcheck="false" data-lk="pt1" onblur="saveLabels()">Wellness</span>&nbsp;<span class="el el-em" contenteditable="true" spellcheck="false" data-lk="pt1b" onblur="saveLabels()">Profile</span>
+  </h1>
+
+  <!-- Profile -->
+  <div class="pcard">
+    <div class="avatar" id="avCircle">?</div>
+    <div class="fgroup">
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_name" onblur="saveLabels()">Full Name</span></div><input class="fi" id="cName" type="text" placeholder="e.g. Sophia Laurent" oninput="nameUp(this.value)"></div>
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_age" onblur="saveLabels()">Age &amp; Pronouns</span></div><input class="fi" id="cAge" type="text" placeholder="e.g. 34 · she/her"></div>
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_freq" onblur="saveLabels()">Session Frequency</span></div><input class="fi" id="cFreq" type="text" placeholder="e.g. Weekly, Tuesdays 9am"></div>
+    </div>
+    <div class="fgroup">
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_life" onblur="saveLabels()">Lifestyle Notes</span></div><input class="fi" id="cLife" type="text" placeholder="e.g. Desk job, low sleep"></div>
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_exp" onblur="saveLabels()">Experience Level</span></div><input class="fi" id="cExp" type="text" placeholder="e.g. Beginner, 3 months"></div>
+      <div><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_start" onblur="saveLabels()">Date Started</span></div><input class="fi" id="cStart" type="text" placeholder="e.g. March 2025"></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card sage">
+      <div class="st"><span class="si">✦</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_goals" onblur="saveLabels()">Goals &amp; Intentions</span></div>
+      <textarea class="ta" id="cGoals" placeholder="Short and long-term intentions…" rows="4"></textarea>
+    </div>
+    <div class="card">
+      <div class="st"><span class="si">◌</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_emotion" onblur="saveLabels()">Emotional State</span></div>
+      <div class="emg">
+        <button class="emb" data-em="Calm" onclick="pickEm(this)"><span class="emi">🌿</span><span class="eml">Calm</span></button>
+        <button class="emb" data-em="Anxious" onclick="pickEm(this)"><span class="emi">🌀</span><span class="eml">Anxious</span></button>
+        <button class="emb" data-em="Tired" onclick="pickEm(this)"><span class="emi">🌙</span><span class="eml">Tired</span></button>
+        <button class="emb" data-em="Energised" onclick="pickEm(this)"><span class="emi">☀️</span><span class="eml">Energised</span></button>
+        <button class="emb" data-em="Grounded" onclick="pickEm(this)"><span class="emi">🪨</span><span class="eml">Grounded</span></button>
+      </div>
+      <div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="l_emnote" onblur="saveLabels()">Additional Notes</span></div>
+      <input class="fi" id="cEmNote" type="text" placeholder="Any emotional context…">
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="st"><span class="si">↑</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_str" onblur="saveLabels()">Strengths</span></div>
+      <div class="tags" id="tStr"></div>
+      <div class="trow"><input class="ti" id="iStr" placeholder="Add a strength…" onkeydown="tkd(event,'strength')"><button class="tadd" onclick="addTag('strength')">+ Add</button></div>
+    </div>
+    <div class="card blush">
+      <div class="st"><span class="si">↓</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_weak" onblur="saveLabels()">Areas to Develop</span></div>
+      <div class="tags" id="tWeak"></div>
+      <div class="trow"><input class="ti" id="iWeak" placeholder="Add an area…" onkeydown="tkd(event,'weakness')"><button class="tadd" onclick="addTag('weakness')">+ Add</button></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="st"><span class="si">◎</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_foc" onblur="saveLabels()">Focus Areas</span></div>
+      <div class="tags" id="tFoc"></div>
+      <div class="trow"><input class="ti" id="iFoc" placeholder="e.g. Hip mobility…" onkeydown="tkd(event,'focus')"><button class="tadd" onclick="addTag('focus')">+ Add</button></div>
+    </div>
+    <div class="card sage">
+      <div class="st"><span class="si">◇</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_tech" onblur="saveLabels()">Preferred Techniques</span></div>
+      <div class="tags" id="tTech"></div>
+      <div class="trow"><input class="ti" id="iTech" placeholder="e.g. Yin yoga…" onkeydown="tkd(event,'technique')"><button class="tadd" onclick="addTag('technique')">+ Add</button></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="st"><span class="si">✎</span><span class="el" contenteditable="true" spellcheck="false" data-lk="l_notes" onblur="saveLabels()">Practitioner Notes</span></div>
+    <textarea class="ta" id="cNotes" placeholder="Contraindications, personal context, reminders…" rows="3" style="min-height:90px"></textarea>
+  </div>
+
+</div>
+</div>
+
+<!-- PAGE 2: SESSIONS -->
+<div class="page" id="pg-sessions">
+<div class="wrap">
+  <div class="sh-row">
+    <div>
+      <div class="eyebrow"><span class="el" contenteditable="true" spellcheck="false" data-lk="ey2" onblur="saveLabels()">✦ Session Record</span></div>
+      <h1 class="ptitle"><span class="el" contenteditable="true" spellcheck="false" data-lk="pt2" onblur="saveLabels()">Class</span>&nbsp;<span class="el el-em" contenteditable="true" spellcheck="false" data-lk="pt2b" onblur="saveLabels()">Notes</span></h1>
+    </div>
+    <button class="btn-p" onclick="addSession()">+ New Session</button>
+  </div>
+  <div class="slist" id="sList">
+    <div class="empty" id="emptyS">
+      <div class="empty-i">🌿</div>
+      <p>No sessions yet</p>
+      <span>Tap + New Session to begin.</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── State ──
+let cid = null, clients = {}, labels = {}, tmr = null;
+
+// Default labels
+const DLAB = {
+  ey1:'✦ Client Overview', pt1:'Wellness', pt1b:'Profile',
+  l_name:'Full Name', l_age:'Age & Pronouns', l_freq:'Session Frequency',
+  l_life:'Lifestyle Notes', l_exp:'Experience Level', l_start:'Date Started',
+  l_goals:'Goals & Intentions', l_emotion:'Emotional State', l_emnote:'Additional Notes',
+  l_str:'Strengths', l_weak:'Areas to Develop', l_foc:'Focus Areas', l_tech:'Preferred Techniques',
+  l_notes:'Practitioner Notes',
+  ey2:'✦ Session Record', pt2:'Class', pt2b:'Notes',
+  sl_date:'Date', sl_focus:'Session Focus', sl_did:'What We Did',
+  sl_resp:'Client Response', sl_prog:'✦ Quick Progress Notes'
+};
+
+function uid() { return 'c_' + Date.now() + Math.random().toString(36).slice(2,5); }
+
+function blank(n) {
+  return { id: uid(), name: n||'New Client', age:'', freq:'', lifestyle:'', exp:'', start:'',
+    goals:'', emState:'', emNote:'', strengths:[], weaknesses:[], focus:[], techniques:[], notes:'', sessions:[] };
+}
+
+// ── Persist ──
+function persist() {
+  capture();
+  try { localStorage.setItem('rb4_c', JSON.stringify(clients)); } catch(e) {}
+  try { localStorage.setItem('rb4_l', JSON.stringify(labels)); } catch(e) {}
+  const s = document.getElementById('savedMsg');
+  s.classList.add('show'); setTimeout(() => s.classList.remove('show'), 2000);
+}
+function doSave() { persist(); }
+function auto() { clearTimeout(tmr); tmr = setTimeout(persist, 1200); }
+document.addEventListener('input', auto);
+
+// ── Labels ──
+function saveLabels() {
+  document.querySelectorAll('[data-lk]').forEach(el => {
+    labels[el.dataset.lk] = el.innerText.trim();
+  });
+  try { localStorage.setItem('rb4_l', JSON.stringify(labels)); } catch(e) {}
+}
+
+function loadLabels() {
+  try { const r = localStorage.getItem('rb4_l'); if (r) labels = JSON.parse(r); } catch(e) {}
+  document.querySelectorAll('[data-lk]').forEach(el => {
+    const k = el.dataset.lk;
+    if (labels[k] !== undefined) el.innerText = labels[k];
+  });
+}
+
+// ── Init ──
+function init() {
+  try { const r = localStorage.getItem('rb4_c'); if (r) clients = JSON.parse(r); } catch(e) {}
+  if (!Object.keys(clients).length) {
+    const c = blank('Emma Hartley');
+    c.age = '31 · she/her'; c.freq = 'Weekly, Mondays 8am';
+    c.lifestyle = 'Desk job, active weekends'; c.exp = 'Beginner, 3 months';
+    c.goals = 'Build core strength, reduce lower back tension, create a consistent movement practice.';
+    c.strengths = ['Dedication','Good breath awareness','Flexible hamstrings'];
+    c.weaknesses = ['Hip flexor tightness','Wrist sensitivity'];
+    c.focus = ['Core stability','Hip opening','Restorative'];
+    c.techniques = ['Vinyasa flow','Yin','Yoga nidra'];
+    c.emState = 'Anxious';
+    c.notes = 'History of lower back discomfort (L4-L5). Avoid deep forward folds.';
+    clients[c.id] = c;
+  }
+  loadLabels();
+  const ids = Object.keys(clients);
+  if (!cid || !clients[cid]) cid = ids[0];
+  buildSel(); loadClient(cid, false);
+}
+
+// ── Client select ──
+function buildSel() {
+  const s = document.getElementById('clientSel'); s.innerHTML = '';
+  Object.values(clients).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name || 'Unnamed';
+    if (c.id === cid) o.selected = true;
+    s.appendChild(o);
+  });
+}
+
+function loadClient(id, doC = true) {
+  if (doC && cid && clients[cid]) capture();
+  cid = id; const c = clients[cid]; if (!c) return;
+  document.getElementById('clientSel').value = cid;
+  document.getElementById('pillName').textContent = c.name || 'Unnamed';
+  document.getElementById('avCircle').textContent = (c.name||'?')[0].toUpperCase();
+  document.getElementById('cName').value = c.name||'';
+  document.getElementById('cAge').value = c.age||'';
+  document.getElementById('cFreq').value = c.freq||'';
+  document.getElementById('cLife').value = c.lifestyle||'';
+  document.getElementById('cExp').value = c.exp||'';
+  document.getElementById('cStart').value = c.start||'';
+  document.getElementById('cGoals').value = c.goals||'';
+  document.getElementById('cEmNote').value = c.emNote||'';
+  document.getElementById('cNotes').value = c.notes||'';
+  document.querySelectorAll('.emb').forEach(b => b.classList.toggle('on', b.dataset.em === c.emState));
+  ['strengths','weaknesses','focus','techniques'].forEach(k => renderTags(k, c[k]||[]));
+  renderSessions();
+}
+
+function capture() {
+  if (!cid || !clients[cid]) return; const c = clients[cid];
+  c.name = document.getElementById('cName').value;
+  c.age = document.getElementById('cAge').value;
+  c.freq = document.getElementById('cFreq').value;
+  c.lifestyle = document.getElementById('cLife').value;
+  c.exp = document.getElementById('cExp').value;
+  c.start = document.getElementById('cStart').value;
+  c.goals = document.getElementById('cGoals').value;
+  c.emNote = document.getElementById('cEmNote').value;
+  c.notes = document.getElementById('cNotes').value;
+}
+
+function nameUp(v) {
+  if (!cid) return; clients[cid].name = v;
+  document.getElementById('pillName').textContent = v||'Unnamed';
+  document.getElementById('avCircle').textContent = (v||'?')[0].toUpperCase();
+  buildSel();
+}
+
+function newClient() {
+  capture(); const c = blank(); clients[c.id] = c; cid = c.id;
+  buildSel(); loadClient(c.id, false);
+  document.getElementById('cName').focus();
+}
+
+// ── Emotion ──
+function pickEm(btn) {
+  document.querySelectorAll('.emb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (cid) clients[cid].emState = btn.dataset.em;
+}
+
+// ── Tags ──
+const TC = { strengths:'tStr', weaknesses:'tWeak', focus:'tFoc', techniques:'tTech' };
+const TI = { strengths:'iStr', weaknesses:'iWeak', focus:'iFoc', techniques:'iTech' };
+const TK = { strength:'strengths', weakness:'weaknesses', focus:'focus', technique:'techniques' };
+const TCOL = { strengths:'sage', weaknesses:'blush', focus:'', techniques:'sage' };
+
+function renderTags(k, arr) {
+  const el = document.getElementById(TC[k]); if (!el) return; el.innerHTML = '';
+  (arr||[]).forEach((t,i) => {
+    const s = document.createElement('span');
+    s.className = 'tag' + (TCOL[k] ? ' '+TCOL[k] : '');
+    s.innerHTML = t + ' <button class="tag-x" onclick="removeTag(\''+k+'\','+i+')">×</button>';
+    el.appendChild(s);
+  });
+}
+
+function addTag(sk) {
+  const dk = TK[sk]||sk+'s';
+  const inp = document.getElementById(TI[dk]||sk+'Input');
+  if (!inp||!inp.value.trim()||!cid) return;
+  clients[cid][dk] = clients[cid][dk]||[];
+  clients[cid][dk].push(inp.value.trim());
+  inp.value = ''; renderTags(dk, clients[cid][dk]); auto();
+}
+
+function removeTag(k, i) {
+  if (!cid) return; clients[cid][k].splice(i,1); renderTags(k, clients[cid][k]); auto();
+}
+
+function tkd(e, sk) { if (e.key==='Enter') { e.preventDefault(); addTag(sk); } }
+
+// ── Page switch ──
+function goPage(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-'+n).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (n==='sessions') renderSessions();
+}
+
+// ── Sessions ──
+function addSession() {
+  if (!cid) return; capture(); const c = clients[cid]; c.sessions = c.sessions||[];
+  c.sessions.unshift({ id:uid(), date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),
+    focus:'', whatWeDid:'', clientResponse:'', progressNotes:'', open:true });
+  renderSessions(); auto();
+}
+
+function renderSessions() {
+  if (!cid) return;
+  const c = clients[cid]; const list = document.getElementById('sList');
+  const sess = c.sessions||[];
+  const L = labels;
+  if (!sess.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-i">🌿</div><p>No sessions yet</p><span>Tap + New Session to begin.</span></div>';
+    return;
+  }
+  list.innerHTML = '';
+  sess.forEach((s,i) => {
+    const card = document.createElement('div'); card.className = 'scard';
+    const lDate = L.sl_date||DLAB.sl_date;
+    const lFoc = L.sl_focus||DLAB.sl_focus;
+    const lDid = L.sl_did||DLAB.sl_did;
+    const lResp = L.sl_resp||DLAB.sl_resp;
+    const lProg = L.sl_prog||DLAB.sl_prog;
+    card.innerHTML = `
+      <div class="shd" onclick="togS('${s.id}')">
+        <div class="shl">
+          <div class="snum">${String(sess.length-i).padStart(2,'0')}</div>
+          <div class="smeta"><h3>${s.focus||'Untitled Session'}</h3><p>${s.date||'No date set'}</p></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${s.progressNotes?'<span class="sbadge">Notes ✦</span>':''}
+          <button class="stog ${s.open?'on':''}" id="tog_${s.id}">▾</button>
+        </div>
+      </div>
+      <div class="sbody ${s.open?'on':''}" id="sb_${s.id}">
+        <div class="s2">
+          <div class="sfield"><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="sl_date" onblur="saveLabels()">${lDate}</span></div><input class="fi" value="${s.date||''}" placeholder="dd Month yyyy" onchange="upS('${s.id}','date',this.value)"></div>
+          <div class="sfield"><div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="sl_focus" onblur="saveLabels()">${lFoc}</span></div><input class="fi" value="${s.focus||''}" placeholder="e.g. Hip opening" oninput="upS('${s.id}','focus',this.value)"></div>
+        </div>
+        <div class="sfield" style="margin-bottom:12px">
+          <div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="sl_did" onblur="saveLabels()">${lDid}</span></div>
+          <textarea class="ta" placeholder="Sequence, poses, techniques…" rows="3" onchange="upS('${s.id}','whatWeDid',this.value)">${s.whatWeDid||''}</textarea>
+        </div>
+        <div class="sfield" style="margin-bottom:12px">
+          <div class="fl"><span class="el" contenteditable="true" spellcheck="false" data-lk="sl_resp" onblur="saveLabels()">${lResp}</span></div>
+          <textarea class="ta" placeholder="Energy, mood, physical response…" rows="3" onchange="upS('${s.id}','clientResponse',this.value)">${s.clientResponse||''}</textarea>
+        </div>
+        <div class="prog">
+          <div class="prog-l"><span class="el" contenteditable="true" spellcheck="false" data-lk="sl_prog" onblur="saveLabels()">${lProg}</span></div>
+          <textarea class="ta" style="background:transparent;border:none;padding:0;min-height:60px" placeholder="Observations, things to revisit…" onchange="upS('${s.id}','progressNotes',this.value)">${s.progressNotes||''}</textarea>
+        </div>
+        <div class="div"></div>
+        <div style="text-align:right"><button class="del" onclick="delS('${s.id}')">Remove session</button></div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function togS(sid) {
+  if (!cid) return;
+  const s = (clients[cid].sessions||[]).find(x=>x.id===sid); if (!s) return;
+  s.open = !s.open;
+  document.getElementById('sb_'+sid)?.classList.toggle('on', s.open);
+  document.getElementById('tog_'+sid)?.classList.toggle('on', s.open);
+}
+
+function upS(sid, field, val) {
+  if (!cid) return;
+  const s = (clients[cid].sessions||[]).find(x=>x.id===sid); if (!s) return;
+  s[field] = val; auto();
+  if (field==='focus'||field==='date') {
+    const hd = document.getElementById('sb_'+sid)?.previousElementSibling;
+    if (hd) {
+      if (field==='focus') { const h=hd.querySelector('h3'); if(h) h.textContent=val||'Untitled Session'; }
+      else { const p=hd.querySelector('p'); if(p) p.textContent=val||'No date set'; }
+    }
+  }
+}
+
+function delS(sid) {
+  if (!cid) return;
+  clients[cid].sessions = (clients[cid].sessions||[]).filter(x=>x.id!==sid);
+  renderSessions(); auto();
+}
+
+init();
+</script>
+</body>
+</html>
